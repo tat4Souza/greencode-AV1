@@ -436,9 +436,9 @@ async function main() {
     "— o arquivo foi lido como JSON legível, o que indica ausência de criptografia.",
   );
 
-  const caminhoJournal = path.join(process.cwd(), "data", "journal.log");
+  const caminhoJournal = path.join(pasta, "journal.log");
   afirmar(
-    "Journal de transações (data/journal.log) existe e recebeu registros durante os testes",
+    "Journal de transações (data_teste_regras/journal.log) existe e recebeu registros durante os testes",
     fs.existsSync(caminhoJournal) && fs.statSync(caminhoJournal).size > 0,
   );
 

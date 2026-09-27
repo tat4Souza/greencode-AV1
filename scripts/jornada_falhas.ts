@@ -419,7 +419,7 @@ async function simularJornadaDeFalhas() {
     );
   }
 
-  console.log("Para sair do ambiente de teste, pressione CTRL C e ENTER");
+  process.exit(anomalias.length > 0 ? 1 : 0);
 }
 
 simularJornadaDeFalhas().catch((err) => {

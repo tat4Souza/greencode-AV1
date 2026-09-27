@@ -175,7 +175,8 @@ async function simularJornadaCLI() {
   console.log(
     "\x1b[1m\x1b[32m================================================================================\x1b[0m\n",
   );
-  console.log("Para sair do ambiente de teste, pressione CTRL C e ENTER");
+
+  process.exit(1);
 }
 
 simularJornadaCLI().catch((err) => {
