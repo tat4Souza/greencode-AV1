@@ -8,7 +8,7 @@ import { ServicoLote } from "../src/services/ServicoLote.ts";
 import { ServicoEquipamento } from "../src/services/ServicoEquipamento.ts";
 import { ServicoRelatorio } from "../src/services/ServicoRelatorio.ts";
 import { ServicoParametros } from "../src/services/ServicoParametros.ts";
-import { CLIInterface } from "../src/cli/CLIIterface.ts";
+import { CLIInterface } from "../src/cli/CLIInterface.ts";
 import { LeitorSenha } from "../src/cli/LeitorSenha.ts";
 import { ConsoleLogger } from "../src/cli/ConsoleLogger.ts";
 import { JournalTransacao } from "../src/core/JournalTransacao.ts";

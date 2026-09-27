@@ -7,9 +7,10 @@ import { ServicoLote } from "./services/ServicoLote.ts";
 import { ServicoEquipamento } from "./services/ServicoEquipamento.ts";
 import { ServicoRelatorio } from "./services/ServicoRelatorio.ts";
 import { ServicoParametros } from "./services/ServicoParametros.ts";
-import { CLIInterface } from "./cli/CLIIterface.ts";
+import { CLIInterface } from "./cli/CLIInterface.ts";
 import { LeitorSenha } from "./cli/LeitorSenha.ts";
 import { ConsoleLogger } from "./cli/ConsoleLogger.ts";
+import { EasterEgg } from "./cli/EasterEgg.ts";
 
 async function bootstrap() {
   const pastaData = path.join(process.cwd(), "data");
@@ -67,7 +68,20 @@ async function bootstrap() {
   await cli.iniciarLoop();
 }
 
-bootstrap().catch((erro) => {
-  ConsoleLogger.erro(`❌ Falha crítica ao iniciar o sistema: ${erro}`);
+async function main() {
+  const args = process.argv.slice(2);
+
+  if (args.includes("--easter-egg") || args.includes("-e")) {
+    await EasterEgg.verificar();
+    process.exit(0);
+  }
+
+  await bootstrap();
+}
+
+main().catch((erro) => {
+  ConsoleLogger.erro(
+    `❌ Falha crítica ao iniciar o sistema:${erro.message || erro}`,
+  );
   process.exit(1);
 });
