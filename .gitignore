@@ -6,7 +6,10 @@ dist/
 
 # Dados e logs de execução/testes locais
 data/
+data_simulacao_falhas/
+data_teste_regras/
 data_simulacao/
 *.log
 *.log.bak
 *.tmp
+
