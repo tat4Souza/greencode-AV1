@@ -176,7 +176,7 @@ async function simularJornadaCLI() {
     "\x1b[1m\x1b[32m================================================================================\x1b[0m\n",
   );
 
-  process.exit(1);
+  process.exit(0);
 }
 
 simularJornadaCLI().catch((err) => {

@@ -60,7 +60,7 @@ export class ValidadorDataEntrada extends Validador {
     }
 
     if (data < noventaDiasAtras) {
-      this.erroMsg = "Data de entrada náo pode ser anterior a 90 dias.";
+      this.erroMsg = "Data de entrada não pode ser anterior a 90 dias.";
       return false;
     }
 

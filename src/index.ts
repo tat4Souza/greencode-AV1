@@ -11,10 +11,15 @@ import { CLIInterface } from "./cli/CLIInterface.ts";
 import { LeitorSenha } from "./cli/LeitorSenha.ts";
 import { ConsoleLogger } from "./cli/ConsoleLogger.ts";
 import { EasterEgg } from "./cli/EasterEgg.ts";
+import { JournalTransacao } from "./core/JournalTransacao.ts";
 
 async function bootstrap() {
   const pastaData = path.join(process.cwd(), "data");
   let chaveMestra: string;
+
+  JournalTransacao.definirDiretorio(pastaData);
+  JournalTransacao.aplicarPoliticaRetencao(180);
+  JournalTransacao.limparBackupsAntigos(180);
 
   if (!GerenciadorConfiguracao.existeConfiguracao()) {
     console.log(
