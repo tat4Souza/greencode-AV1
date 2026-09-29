@@ -221,14 +221,24 @@ npm run test:regras
 
 ## 📝 Considerações finais para a próxima etapa: <a id="conclusao"></a>
 
-A estrutura desenvolvida para o **GreenCode** nesta etapa CLI cria uma base sólida, organizada e segura. Como as regras de negócio, as validações e as travas de segurança foram mantidas separadas da interface de terminal, o sistema está pronto para evoluir para a Web e para um banco de dados relacional de forma simples e direta.
+O sistema **GreenCode** foi construído com uma base sólida e segura para operar em linha de comando (CLI). Para ir além de apenas listar as tecnologias usadas (como criptografia e controle de acesso), esta seção analisa de forma crítica os **pontos fracos da versão atual** e explica como eles serão corrigidos na transição para um sistema Web com banco de dados.
 
-### 1. Preparação para a Interface Web
+---
+
+### 1. Limitações Atuais e Como Serão Resolvidas
+
+| Área do Sistema | O que é um limite hoje (CLI Local) | Por que foi feito assim | Como vai evoluir na Web / Banco de Dados |
+| :--- | :--- | :--- | :--- |
+| **Guarda da Chave de Segurança** | A chave que tranca e destranca os dados fica salva em um arquivo de texto simples (`config.master.json`), na mesma pasta dos dados. | Evita complicar a instalação local com serviços externos de chave. | A chave sairá do arquivo e vai para variáveis de ambiente protegidas no servidor. |
+| **Checagem de Permissões (RBAC)** | As regras de quem pode acessar o quê ficam direto nos comandos do terminal. | Funciona bem para a CLI, pois só existe uma porta de entrada para os comandos. | A validação de permissões passará para a API (via tokens de acesso), garantindo que ninguém burle as regras na Web. |
+| **Proteção de Senhas (SHA-256)** | O SHA-256 é um cálculo muito rápido, o que facilita ataques se o sistema for exposto na internet. | É aceitável para um sistema local e fechado, com poucos usuários. | Será trocado por algoritmos próprios para senhas (como **bcrypt**), que são mais lentos e mais difíceis de burlar. |
+
+### 2. Preparação para a Interface Web
 
 - **Regras de Negócio Isoladas:** Todo o funcionamento do sistema (triagem de equipamentos, controle de lotes, validação de regras e permissões) já está pronto em módulos independentes. Para criar a versão Web, basta conectar esses módulos a uma API (como REST), sem precisar refazer as regras que garantem o funcionamento do negócio.
 - **Segurança e Acesso na Web:** O modelo atual de permissões por perfil (RBAC) e tempo de expiração de sessão será adaptado para o padrão Web através de tokens de acesso (como JWT), mantendo os mesmos níveis de proteção e controle de usuário.
 
-### 2. Transição para Banco de Dados Relacional
+### 3. Transição para Banco de Dados Relacional
 
 - **Estrutura de Dados Pronta para Tabelas:** As informações salvas atualmente nos arquivos do sistema (Organizações, Lotes, Equipamentos, Usuários e Histórico) já seguem uma estrutura organizada. Isso facilita a criação direta das tabelas no banco de dados relacional, garantindo que relacionamentos (como vincular um equipamento a um lote) e regras de unicidade (como não repetir CNPJ) funcionem de forma nativa.
 - **Rastreabilidade Automática com _Triggers_:** Para manter a regra do _Journal_ (histórico imutável de todas as ações), será utilizado de **gatilhos (_triggers_)** diretamente no banco de dados. Assim, sempre que houver uma movimentação em alguma entidade, o próprio banco registrará automaticamente esse evento na tabela de histórico. Isso garante que nenhum dado seja alterado sem deixar um registro do que aconteceu.
