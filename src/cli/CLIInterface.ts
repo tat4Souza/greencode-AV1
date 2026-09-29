@@ -40,16 +40,7 @@ export class CLIInterface {
     login: ["--user"],
     "usuario cadastrar": ["--user", "--papel"],
     "parametros configurar": ["--aliquota", "--depreciacao"],
-    "org cadastrar": [
-      "--razao",
-      "--cnpj",
-      "--mensal",
-      "--venc",
-      "--ie",
-      "--end",
-      "--tel",
-      "--email",
-    ],
+    "org cadastrar": ["--razao", "--cnpj", "--mensal", "--venc"],
     "org renovar": ["--id", "--venc"],
     "lote criar": ["--org", "--nf", "--transp"],
     "equipamento adicionar": [
