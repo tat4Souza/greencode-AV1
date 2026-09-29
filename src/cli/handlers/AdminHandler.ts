@@ -17,15 +17,6 @@ export class AdminHandler {
       const user = cmd.flags["user"];
       const papel = cmd.flags["papel"];
 
-      if (!user)
-        throw new Error(
-          "Especificar o nome do usuário (--user) é obrigatório.",
-        );
-      if (!papel)
-        throw new Error(
-          `Especificar o papel do usuário (--papel) é obrigatório. Opções: ${Object.values(PapelUsuario).join(", ")}`,
-        );
-
       if (
         !Object.values(PapelUsuario).includes(
           papel.toUpperCase() as PapelUsuario,
@@ -36,12 +27,25 @@ export class AdminHandler {
         );
       }
 
-      const pass = await LeitorSenha.lerSenha(
-        `Defina a senha para o novo usuário (${user}): `,
-      );
+      let pass = "";
+      while (true) {
+        pass = await LeitorSenha.lerSenha(
+          `Defina a senha para o novo usuário (${user}): `,
+        );
 
-      if (!pass || pass.trim().length === 0) {
-        throw new Error("A senha do usuário não pode estar em branco.");
+        if (pass.trim().length >= 6) {
+          break;
+        }
+
+        if (!pass || pass.trim().length === 0) {
+          ConsoleLogger.erro(" A senha do usuário não pode estar em branco.\n");
+        }
+
+        if (pass.trim().length < 6) {
+          ConsoleLogger.erro(
+            " A senha deve possuir no mínimo 6 caracteres. Tente novamente.\n",
+          );
+        }
       }
 
       this.servicoAuth.cadastroUsuario(

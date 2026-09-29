@@ -31,15 +31,27 @@ async function bootstrap() {
     console.log(
       "\x1b[1m\x1b[34m================================================================================\x1b[0m",
     );
+
+    let senhaAdmin = "";
+    while (true) {
+      senhaAdmin = await LeitorSenha.lerSenha(
+        "Defina a senha para o primeiro Administrador (admin):",
+      );
+
+      if (senhaAdmin.trim().length >= 6) {
+        break;
+      }
+
+      ConsoleLogger.erro(
+        " A senha deve possuir no mínimo 6 caracteres. Tente novamente.\n",
+      );
+    }
+
     console.log(
       "\x1b[2m Gerando nova chave criptográfica AES-256 mestra... \x1b[0m\n",
     );
 
     chaveMestra = GerenciadorConfiguracao.criarConfiguracaoMestre();
-
-    const senhaAdmin = await LeitorSenha.lerSenha(
-      "Defina a senha para o primeiro Administrador (admin):",
-    );
 
     const repositorio = new RepositorioArquivo(pastaData, chaveMestra);
     const servicoAuth = new ServicoAutenticacao(repositorio);

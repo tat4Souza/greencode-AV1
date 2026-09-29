@@ -36,7 +36,41 @@ export class CLIInterface {
   private gestorHandler: GestorHandler;
   private auditorHandler: AuditorHandler;
 
-  private flagsComando: Record<string, string[]> = {
+  private flagsObrigatorias: Record<string, string[]> = {
+    login: ["--user"],
+    "usuario cadastrar": ["--user", "--papel"],
+    "parametros configurar": ["--aliquota", "--depreciacao"],
+    "org cadastrar": [
+      "--razao",
+      "--cnpj",
+      "--mensal",
+      "--venc",
+      "--ie",
+      "--end",
+      "--tel",
+      "--email",
+    ],
+    "org renovar": ["--id", "--venc"],
+    "lote criar": ["--org", "--nf", "--transp"],
+    "equipamento adicionar": [
+      "--lote",
+      "--tipo",
+      "--marca",
+      "--modelo",
+      "--ano",
+      "--peso",
+    ],
+    "lote triagem": ["--id"],
+    "equipamento estado": ["--id", "--estado"],
+    "equipamento movimentar": ["--id", "--status"],
+    "equipamento rastrear": ["--id"],
+    "relatorio org": ["--id"],
+    "relatorio financeiro": [],
+    "relatorio status": ["--status"],
+    "senha alterar": [],
+  };
+
+  private flagsComandoAutocomplete: Record<string, string[]> = {
     login: ["--user"],
     "usuario cadastrar": ["--user", "--papel"],
     "parametros configurar": ["--aliquota", "--depreciacao"],
@@ -100,6 +134,37 @@ export class CLIInterface {
     this.auditorHandler = new AuditorHandler(this.equipamento, this.relatorio);
 
     this.configurarReadline();
+  }
+
+  private validarFlagsObrigatorias(
+    acaoPrincipal: string,
+    flagsFornecidas: Record<string, string>,
+  ): void {
+    const obrigatorias = this.flagsObrigatorias[acaoPrincipal];
+
+    if (!obrigatorias || obrigatorias.length === 0) {
+      return;
+    }
+
+    const ausentes: string[] = [];
+
+    for (const flag of obrigatorias) {
+      const chaveFlag = flag.replace(/^--?/, "");
+      if (
+        !flagsFornecidas[chaveFlag] ||
+        flagsFornecidas[chaveFlag].trim() === ""
+      ) {
+        ausentes.push(flag);
+      }
+    }
+
+    if (ausentes.length > 0) {
+      throw new Error(
+        `Parâmetros obrigatórios ausentes para "${acaoPrincipal}": ${ausentes.join(
+          ", ",
+        )}`,
+      );
+    }
   }
 
   private obterComandosPermitidos(): string[] {
@@ -174,16 +239,16 @@ export class CLIInterface {
 
     if (
       acaoEncontrada &&
-      this.flagsComando[acaoEncontrada] &&
+      this.flagsComandoAutocomplete[acaoEncontrada] &&
       ultimoToken.startsWith("-")
     ) {
-      const flagsPossiveis = this.flagsComando[acaoEncontrada].filter((f) =>
-        f.startsWith(ultimoToken),
-      );
+      const flagsPossiveis = this.flagsComandoAutocomplete[
+        acaoEncontrada
+      ].filter((f) => f.startsWith(ultimoToken));
       return [
         flagsPossiveis.length
           ? flagsPossiveis
-          : this.flagsComando[acaoEncontrada],
+          : this.flagsComandoAutocomplete[acaoEncontrada],
         ultimoToken,
       ];
     }
@@ -225,7 +290,7 @@ export class CLIInterface {
     console.log(
       "\x1b[1m\x1b[32m    Para prosseguir, efetue o login no sistema \x1b[0m",
     );
-    console.log("    Comando: login --user <usuario>");
+    console.log("    Comando [Obrigatório]: login --user <usuario>");
     console.log('    Ou digite: "sair" para encerrar.');
     console.log("");
   }
@@ -241,7 +306,7 @@ export class CLIInterface {
       "\x1b[1m\x1b[32m================================================================================\x1b[0m",
     );
     console.log(
-      "\x1b[2m--- Pressione <TAB> para auto-completar comandos, flags e opções de Enums ---\x1b[0m\n",
+      "\x1b[2m--- Legenda: --parâmetro <valor> (Obrigatório) | [--parâmetro <valor>] (Opcional) ---\x1b[0m\n",
     );
     console.log(
       "------------------------------------------------------------------------",
@@ -257,7 +322,7 @@ export class CLIInterface {
         break;
       case PapelUsuario.OPERADOR_CADASTRO:
         console.log(
-          "  • org cadastrar --razao <nome> --cnpj <cnpj> --mensal <R$> --venc <AAAA-MM-DD>",
+          "  • org cadastrar --razao <nome> --cnpj <cnpj> --mensal <R$> --venc <AAAA-MM-DD> --ie <inscricao estadual> --end <endereco> --tel <tel> --email <email>",
         );
         console.log("  • org listar");
         console.log("  • org renovar --id <id> --venc <AAAA-MM-DD>");
@@ -274,7 +339,7 @@ export class CLIInterface {
           "  • equipamento estado --id <codigoOuId> --estado <ESTADO> [--justificativa <texto>]",
         );
         console.log(
-          "  • equipamento movimentar --id <codigo> --status <STATUS>",
+          "  • equipamento movimentar --id <codigo> --status <STATUS> [--origem <orig>] [--destino <dest>] [--obs <texto>]",
         );
         console.log("  • equipamento rastrear --id <codigoOuId>");
         break;
@@ -336,6 +401,8 @@ export class CLIInterface {
           await this.processarComando(cmdTexto);
         } catch (erro: any) {
           ConsoleLogger.erro(erro.message);
+        } finally {
+          this.configurarReadline();
         }
       }
     }
@@ -361,6 +428,16 @@ export class CLIInterface {
       }
       return;
     }
+
+    for (const [chave, valor] of Object.entries(parsed.flags)) {
+      if (!valor || valor.trim() === "") {
+        throw new Error(
+          `A flag '--${chave}' foi informada mas não contém um valor válido.`,
+        );
+      }
+    }
+
+    this.validarFlagsObrigatorias(parsed.acaoPrincipal, parsed.flags);
 
     if (!this.sessaoAtual) {
       if (parsed.acaoPrincipal.startsWith("login")) {
@@ -419,7 +496,19 @@ export class CLIInterface {
 
     if (parsed.acaoPrincipal === "senha alterar") {
       const antiga = await LeitorSenha.lerSenha("Digite a senha atual: ");
-      const nova = await LeitorSenha.lerSenha("Digite a nova senha: ");
+
+      let nova = "";
+      while (true) {
+        nova = await LeitorSenha.lerSenha("Digite a nova senha: ");
+
+        if (nova.trim().length >= 6) {
+          break;
+        }
+
+        ConsoleLogger.erro(
+          " A senha deve possuir no mínimo 6 caracteres. Tente novamente.\n",
+        );
+      }
 
       this.configurarReadline();
 
